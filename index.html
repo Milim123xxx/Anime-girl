@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>R34 Feed</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+    }
+    header {
+      background: #000;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .feed {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      background: #1b1b1b;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .card img, .card video {
+      width: 100%;
+      display: block;
+    }
+    .card .caption {
+      padding: .5rem;
+      font-size: .9rem;
+      color: #ccc;
+    }
+    #uploadModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #222;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      margin-bottom: .5rem;
+      padding: .5rem;
+      border: none;
+      border-radius: 6px;
+    }
+    button {
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .tags {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-bottom: .5rem;
+    }
+    .tag-btn {
+      background: #333;
+      color: #fff;
+      padding: .25rem .5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>🔥 R34 Gallery</header>
+  <div class="feed" id="feed"></div><button style="position:fixed;bottom:20px;right:20px;border-radius:50%;width:60px;height:60px;background:#fff;color:#000;font-size:2rem;" onclick="openUpload()">＋</button>
+
+  <div id="uploadModal">
+    <div class="modal-content">
+      <h2>อัปโหลด</h2>
+      <div class="tags">
+        <div class="tag-btn" onclick="addTag('tentacle')">tentacle</div>
+        <div class="tag-btn" onclick="addTag('insect')">insect</div>
+        <div class="tag-btn" onclick="addTag('dog')">dog</div>
+        <div class="tag-btn" onclick="addTag('horse')">horse</div>
+      </div>
+      <input type="file" id="files" multiple accept="image/*,video/*">
+      <textarea id="caption" placeholder="แคปชัน"></textarea>
+      <input type="text" id="tags" placeholder="แท็ก (คั่นด้วย ,)">
+      <label><input type="checkbox" id="confirm"> ยืนยันทุกคน 18+</label>
+      <button onclick="uploadPost()">อัปโหลด</button>
+      <button onclick="closeUpload()" style="background:#555;color:#fff;">ปิด</button>
+    </div>
+  </div>  <script>
+    const feed = document.getElementById('feed');
+    let posts = [];
+
+    function renderFeed(){
+      feed.innerHTML = posts.map(p => `
+        <div class="card">
+          ${p.type === 'video' ? `<video src="${p.url}" controls></video>` : `<img src="${p.url}" alt="">`}
+          <div class="caption">${p.caption} <small>${p.tags.join(', ')}</small></div>
+        </div>
+      `).join('');
+    }
+
+    function openUpload(){
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+    function closeUpload(){
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    function addTag(tag){
+      const tagInput = document.getElementById('tags');
+      if(tagInput.value.includes(tag)) return;
+      tagInput.value += (tagInput.value ? ', ' : '') + tag;
+    }
+
+    function uploadPost(){
+      const files = document.getElementById('files').files;
+      const caption = document.getElementById('caption').value;
+      const tags = document.getElementById('tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+      const confirm18 = document.getElementById('confirm').checked;
+
+      if(!confirm18) return alert('ต้องยืนยันอายุ 18+');
+      if(files.length === 0) return alert('เลือกไฟล์ก่อน');
+
+      for(let file of files){
+        const url = URL.createObjectURL(file);
+        posts.unshift({ url, caption, tags, type: file.type.startsWith('video') ? 'video' : 'image' });
+      }
+
+      renderFeed();
+      closeUpload();
+    }
+
+    renderFeed();
+  </script></body>
+</html>
